@@ -39,12 +39,12 @@ int main(int argc, char **argv)
             #pragma omp atomic
             c++;
             if ((c & 0xFFFF) == 0 && c < est_max_c)
-            #pragma omp critical
             {
                 auto t_now = std::chrono::steady_clock::now();
                 double dt = std::chrono::duration_cast<std::chrono::duration<double>>(t_now - t_start).count();
                 double eta_sec = dt * (est_max_c - c) / c;
                 auto eta = std::div(eta_sec / 60.0, 60);
+                #pragma omp critical
                 std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
             }
         }
