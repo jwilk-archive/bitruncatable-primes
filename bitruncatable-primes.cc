@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 #include <cassert>
+#include <chrono>
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 
@@ -12,6 +14,9 @@ int main(int argc, char **argv)
     std::vector<mpz_class> primes = {2, 3, 5, 7};
     int len = 1;
     mpz_class record;
+    const int est_max_c = 332579483;
+    int c = 0;
+    auto t_start = std::chrono::steady_clock::now();
     while (primes.size()) {
         std::vector<mpz_class> new_primes;
         #pragma omp parallel for
@@ -30,6 +35,17 @@ int main(int argc, char **argv)
                         #pragma omp critical
                         new_primes.push_back(n);
                 }
+            }
+            #pragma omp atomic
+            c++;
+            if ((c & 0xFFFF) == 0 && c < est_max_c)
+            #pragma omp critical
+            {
+                auto t_now = std::chrono::steady_clock::now();
+                double dt = std::chrono::duration_cast<std::chrono::duration<double>>(t_now - t_start).count();
+                double eta_sec = dt * (est_max_c - c) / c;
+                auto eta = std::div(eta_sec / 60.0, 60);
+                std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
             }
         }
         if (new_primes.size() == 0)
