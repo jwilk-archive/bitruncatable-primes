@@ -15,11 +15,11 @@ int main(int argc, char **argv)
     while (primes.size()) {
         std::vector<mpz_class> new_primes;
         #pragma omp parallel for
-        for (int d1 = 1; d1 <= 9; d1++) {
+        for (size_t i = 0; i < primes.size(); i++) {
             std::vector<char> s(len + 3);
-            s[0] = d1 + '0';
-            for (mpz_class &p : primes) {
-                mpz_get_str(&s[1], 10, p.get_mpz_t());
+            mpz_get_str(&s[1], 10, primes[i].get_mpz_t());
+            for (int d1 = 1; d1 <= 9; d1++) {
+                s[0] = d1 + '0';
                 s[len + 1] = '0';
                 mpz_class n0(s.data());
                 for (int d2 = 1; d2 <= 9; d2 += 2) {
