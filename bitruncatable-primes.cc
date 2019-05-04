@@ -9,57 +9,79 @@
 
 #include <gmpxx.h>
 
-int main(int argc, char **argv)
+static mpz_class record;
+
+static const int est_max_c = 332579483;
+static int c = 0;
+
+auto t_start = std::chrono::steady_clock::now();
+
+void explore(std::string s)
 {
-    std::vector<mpz_class> primes = {2, 3, 5, 7};
-    int len = 1;
-    mpz_class record;
-    const int est_max_c = 332579483;
-    int c = 0;
-    auto t_start = std::chrono::steady_clock::now();
-    while (primes.size()) {
-        std::vector<mpz_class> new_primes;
-        #pragma omp parallel for
-        for (size_t i = 0; i < primes.size(); i++) {
-            std::vector<char> s(len + 3);
-            mpz_get_str(&s[1], 10, primes[i].get_mpz_t());
-            for (int d1 = 1; d1 <= 9; d1++) {
-                s[0] = d1 + '0';
-                s[len + 1] = '0';
-                mpz_class n0(s.data());
-                for (int d2 = 1; d2 <= 9; d2 += 2) {
-                    if (d2 == 5)
-                        continue;
-                    mpz_class n = n0 + d2;
-                    if (mpz_probab_prime_p(n.get_mpz_t(), 16))
-                        #pragma omp critical
-                        new_primes.push_back(n);
-                }
-            }
-            #pragma omp atomic
-            c++;
-            if ((c & 0xFFFF) == 0 && c < est_max_c)
-            {
-                auto t_now = std::chrono::steady_clock::now();
-                double dt = std::chrono::duration_cast<std::chrono::duration<double>>(t_now - t_start).count();
-                double eta_sec = dt * (est_max_c - c) / c;
-                auto eta = std::div(eta_sec / 60.0, 60);
-                #pragma omp critical
-                std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
+    #pragma omp atomic
+    c++;
+    if ((c & 0xFFF) == 0 && c < est_max_c)
+    {
+        auto t_now = std::chrono::steady_clock::now();
+        double dt = std::chrono::duration_cast<std::chrono::duration<double>>(t_now - t_start).count();
+        double eta_sec = dt * (est_max_c - c) / c;
+        auto eta = std::div(eta_sec / 60.0, 60);
+        #pragma omp critical
+        std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
+    }
+    size_t len = s.length();
+    std::vector<char> z(len + 3);
+    std::copy(s.begin(), s.end(), z.begin() + 1);
+    bool dead_end = true;
+    for (int d1 = 1; d1 <= 9; d1++) {
+        z[0] = d1 + '0';
+        z[len + 1] = '0';
+        mpz_class n0(z.data());
+        for (int d2 = 1; d2 <= 9; d2 += 2) {
+            if (d2 == 5)
+                continue;
+            mpz_class n = n0 + d2;
+            if (mpz_probab_prime_p(n.get_mpz_t(), 16)) {
+                z[len + 1] = '0' + d2;
+                explore(z.data());
+                dead_end = false;
             }
         }
-        if (new_primes.size() == 0)
-            record = *std::max_element(primes.begin(), primes.end());
-        primes = std::move(new_primes);
-        len += 2;
-        std::cerr << "len=" << len << ", #=" << primes.size() << std::endl;
     }
+    if (dead_end)
+    #pragma omp critical
+    {
+        mpz_class n(s);
+        if (n > record) {
+             std::cout << n << " (" << s.length() << " digits)" << std::endl;
+             record = n;
+        }
+    }
+}
+
+int main(int argc, char **argv)
+{
+    std::vector<mpz_class> initial_primes;
+    for (int i = 100; i <= 999; i++) {
+        switch ((i / 10) % 10) {
+        case 2:
+        case 3:
+        case 5:
+        case 7:
+            mpz_class j(i);
+            if (mpz_probab_prime_p(j.get_mpz_t(), 0))
+                initial_primes.push_back(j);
+        }
+    }
+    assert(initial_primes.size() == 59);
+    #pragma omp parallel for
+    for (size_t i = 0; i < initial_primes.size(); i++)
+        explore(initial_primes[i].get_str());
     // double-check with higher number of Miller-Rabin iterations
     mpz_class m = record;
     while (true) {
         assert(mpz_probab_prime_p(m.get_mpz_t(), 40));
         std::string s = m.get_str();
-        std::cout << s << std::endl;
         if (s.length() == 1)
             break;
         m = mpz_class(s.substr(1, s.length() - 2));
