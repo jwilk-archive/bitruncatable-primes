@@ -16,7 +16,7 @@ static int c = 0;
 
 auto t_start = std::chrono::steady_clock::now();
 
-void explore(std::string s)
+void explore(char *s, int w)
 {
     #pragma omp atomic
     c++;
@@ -29,31 +29,32 @@ void explore(std::string s)
         #pragma omp critical
         std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
     }
-    size_t len = s.length();
-    std::vector<char> z(len + 3);
-    std::copy(s.begin(), s.end(), z.begin() + 1);
     bool dead_end = true;
+    w += 1;
     for (int d1 = 1; d1 <= 9; d1++) {
-        z[0] = d1 + '0';
-        z[len + 1] = '0';
-        mpz_class n0(z.data());
+        s[-w] = d1 + '0';
+        s[+w] = '0';
+        mpz_class n0(s - w);
         for (int d2 = 1; d2 <= 9; d2 += 2) {
             if (d2 == 5)
                 continue;
             mpz_class n = n0 + d2;
             if (mpz_probab_prime_p(n.get_mpz_t(), 16)) {
-                z[len + 1] = '0' + d2;
-                explore(z.data());
+                s[+w] = '0' + d2;
+                explore(s, w);
                 dead_end = false;
             }
         }
     }
+    s[-w] = '\0';
+    s[+w] = '\0';
+    w--;
     if (dead_end)
     #pragma omp critical
     {
-        mpz_class n(s);
+        mpz_class n(s - w);
         if (n > record) {
-             std::cout << n << " (" << s.length() << " digits)" << std::endl;
+             std::cout << n << " (" << (2 * w + 1) << " digits)" << std::endl;
              record = n;
         }
     }
@@ -75,8 +76,11 @@ int main(int argc, char **argv)
     }
     assert(initial_primes.size() == 59);
     #pragma omp parallel for
-    for (size_t i = 0; i < initial_primes.size(); i++)
-        explore(initial_primes[i].get_str());
+    for (size_t i = 0; i < initial_primes.size(); i++) {
+        char s[128] = {};
+        mpz_get_str(s + (sizeof s) / 2, 10, initial_primes[i].get_mpz_t());
+        explore(s + (sizeof s) / 2 + 1, 1);
+    }
     // double-check with higher number of Miller-Rabin iterations
     mpz_class m = record;
     while (true) {
