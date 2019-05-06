@@ -12,7 +12,7 @@
 static mpz_class record;
 
 static constexpr int est_max_c = 331780864;
-static int cnt = 0;
+static int cnt = 4;
 
 static constexpr int max_half_width = 63;
 
