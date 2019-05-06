@@ -53,6 +53,7 @@ static void explore(char *s, int w)
     }
     bool dead_end = true;
     w += 1;
+    assert(w <= max_half_width);
     for (int d1 = 1; d1 <= 9; d1++) {
         s[-w] = d1 + '0';
         s[+w] = '1';
