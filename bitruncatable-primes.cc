@@ -57,7 +57,7 @@ static void explore(char *s, int w)
     for (int d1 = 1; d1 <= 9; d1++) {
         s[-w] = d1 + '0';
         s[+w] = '1';
-        mpz_class n(s - w);
+        mpz_class n(s - w, 10);
         for (int d2 = 1; d2 <= 9; d2 += 2, n += 2) {
             if (d2 == 5)
                 continue;
@@ -74,7 +74,7 @@ static void explore(char *s, int w)
     if (dead_end)
     #pragma omp critical
     {
-        mpz_class n(s - w);
+        mpz_class n(s - w, 10);
         if (n > record) {
              std::cout << n << " (" << (2 * w + 1) << " digits)" << std::endl;
              record = n;
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
         std::string s = m.get_str();
         if (s.length() == 1)
             break;
-        m = mpz_class(s.substr(1, s.length() - 2));
+        m = mpz_class(s.substr(1, s.length() - 2), 10);
     }
 }
 
