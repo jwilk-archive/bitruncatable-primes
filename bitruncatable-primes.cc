@@ -11,10 +11,14 @@
 
 static mpz_class record;
 
+static constexpr bool allow_zero = false;
+
 static constexpr int est_max_c = 332579483;
+// FIXME: est_max_c is off when zero is allowed
 static int cnt = 0;
 
-static constexpr int max_half_width = 63;
+static constexpr int max_half_width = 9999;
+// FIXME: way too much
 
 double timer()
 {
@@ -54,7 +58,7 @@ static void explore(char *s, int w)
     bool dead_end = true;
     w += 1;
     assert(w <= max_half_width);
-    for (int d1 = 1; d1 <= 9; d1++) {
+    for (int d1 = 1 - allow_zero; d1 <= 9; d1++) {
         s[-w] = d1 + '0';
         s[+w] = '1';
         mpz_class n(s - w, 10);
@@ -85,7 +89,7 @@ static void explore(char *s, int w)
 int main(int argc, char **argv)
 {
     std::vector<mpz_class> initial_primes;
-    for (int i = 100; i <= 999; i++) {
+    for (int i = allow_zero ? 2 : 100; i <= 999; i++) {
         switch ((i / 10) % 10) {
         case 2:
         case 3:
@@ -96,11 +100,13 @@ int main(int argc, char **argv)
                 initial_primes.push_back(j);
         }
     }
-    assert(initial_primes.size() == 59);
+    assert(initial_primes.size() == (allow_zero ? 68 : 59));
     #pragma omp parallel for
     for (size_t i = 0; i < initial_primes.size(); i++) {
+        mpz_class q = 1000 + initial_primes[i];
         char s[2 * max_half_width + 2] = {};
-        mpz_get_str(s + max_half_width - 1, 10, initial_primes[i].get_mpz_t());
+        mpz_get_str(s + max_half_width - 2, 10, q.get_mpz_t());
+        s[max_half_width - 2] = '\0';
         explore(s + max_half_width, 1);
     }
     // double-check with higher number of Miller-Rabin iterations
