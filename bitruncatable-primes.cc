@@ -14,7 +14,13 @@ static mpz_class record;
 static const int est_max_c = 332579483;
 static int cnt = 0;
 
-auto t_start = std::chrono::steady_clock::now();
+double timer()
+{
+    static auto t_start = std::chrono::steady_clock::now();
+    auto t_now = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(t_now - t_start);
+    return duration.count();
+}
 
 std::div_t prev_eta = {};
 
@@ -34,8 +40,7 @@ void explore(char *s, int w)
     c = ++cnt;
     if ((c & 0xFFF) == 0 && c < est_max_c)
     {
-        auto t_now = std::chrono::steady_clock::now();
-        double dt = std::chrono::duration_cast<std::chrono::duration<double>>(t_now - t_start).count();
+        double dt = timer();
         double eta_sec = dt * (est_max_c - c) / c;
         auto eta = std::div(eta_sec / 60.0, 60);
         #pragma omp critical
