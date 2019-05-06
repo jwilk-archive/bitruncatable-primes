@@ -12,14 +12,15 @@
 static mpz_class record;
 
 static const int est_max_c = 332579483;
-static int c = 0;
+static int cnt = 0;
 
 auto t_start = std::chrono::steady_clock::now();
 
 void explore(char *s, int w)
 {
-    #pragma omp atomic
-    c++;
+    int c;
+    #pragma omp atomic capture
+    c = ++cnt;
     if ((c & 0xFFF) == 0 && c < est_max_c)
     {
         auto t_now = std::chrono::steady_clock::now();
