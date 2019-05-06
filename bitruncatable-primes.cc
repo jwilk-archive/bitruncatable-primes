@@ -53,12 +53,11 @@ static void explore(char *s, int w)
     w += 1;
     for (int d1 = 1; d1 <= 9; d1++) {
         s[-w] = d1 + '0';
-        s[+w] = '0';
-        mpz_class n0(s - w);
-        for (int d2 = 1; d2 <= 9; d2 += 2) {
+        s[+w] = '1';
+        mpz_class n(s - w);
+        for (int d2 = 1; d2 <= 9; d2 += 2, n += 2) {
             if (d2 == 5)
                 continue;
-            mpz_class n = n0 + d2;
             if (mpz_probab_prime_p(n.get_mpz_t(), 16)) {
                 s[+w] = '0' + d2;
                 explore(s, w);
