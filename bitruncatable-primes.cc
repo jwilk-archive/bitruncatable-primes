@@ -20,6 +20,8 @@ static int cnt = 4;
 static constexpr int max_half_width = 9999;
 // FIXME: way too much
 
+static int stats[max_half_width] = {4};
+
 double timer()
 {
     static auto t_start = std::chrono::steady_clock::now();
@@ -42,6 +44,8 @@ static bool operator !=(std::div_t x, std::div_t y)
 static void explore(char *s, int w)
 {
     int c;
+    #pragma omp atomic
+    stats[w]++;
     #pragma omp atomic capture
     c = ++cnt;
     if ((c & 0xFFF) == 0 && c < est_max_c)
@@ -118,6 +122,9 @@ int main(int argc, char **argv)
             break;
         m = mpz_class(s.substr(1, s.length() - 2), 10);
     }
+    std::cerr << "Summary (length, count):" << std::endl;
+    for (int w = 0; stats[w]; w++)
+        std::cerr << "\t" << 2 * w + 1 << "\t" << stats[w] << std::endl;
 }
 
 // vim:ts=4 sts=4 sw=4 et
