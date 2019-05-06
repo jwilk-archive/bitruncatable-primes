@@ -24,16 +24,16 @@ double timer()
 
 std::div_t prev_eta = {};
 
-bool operator ==(std::div_t x, std::div_t y)
+static bool operator ==(std::div_t x, std::div_t y)
 {
     return (x.quot == y.quot) && (x.rem == y.rem);
 }
-bool operator !=(std::div_t x, std::div_t y)
+static bool operator !=(std::div_t x, std::div_t y)
 {
     return !(x == y);
 }
 
-void explore(char *s, int w)
+static void explore(char *s, int w)
 {
     int c;
     #pragma omp atomic capture
