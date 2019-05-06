@@ -16,6 +16,17 @@ static int cnt = 0;
 
 auto t_start = std::chrono::steady_clock::now();
 
+std::div_t prev_eta = {};
+
+bool operator ==(std::div_t x, std::div_t y)
+{
+    return (x.quot == y.quot) && (x.rem == y.rem);
+}
+bool operator !=(std::div_t x, std::div_t y)
+{
+    return !(x == y);
+}
+
 void explore(char *s, int w)
 {
     int c;
@@ -28,7 +39,10 @@ void explore(char *s, int w)
         double eta_sec = dt * (est_max_c - c) / c;
         auto eta = std::div(eta_sec / 60.0, 60);
         #pragma omp critical
-        std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
+        if (eta != prev_eta) {
+            std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
+            prev_eta = eta;
+        }
     }
     bool dead_end = true;
     w += 1;
