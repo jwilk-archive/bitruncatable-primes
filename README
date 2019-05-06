@@ -1,0 +1,26 @@
+Overview
+========
+
+This program finds the largest
+`bi-truncatable prime <https://www.primepuzzles.net/puzzles/puzz_950.htm>`_:
+
+.. code:: console
+
+   $ bitruncatable-primes
+   3711663323341112731993391937313 (31 digits)
+   72471166332334111273199339193731311 (35 digits)
+   88671166332334111273199339193731911 (35 digits)
+   3193381663323341112731993391937791971 (37 digits)
+   …
+   7228828176786792552781668926755667258635743361825711373791931117197999133917737137399993737111177 (97 digits)
+
+Prerequisites
+=============
+
+* C++11 compiler (with OpenOMP 3.1 support)
+* GMP_
+
+.. _GMP:
+   https://gmplib.org/
+
+.. vim:ft=rst ts=3 sts=3 sw=3 et
