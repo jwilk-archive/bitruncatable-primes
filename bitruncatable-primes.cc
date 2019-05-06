@@ -14,6 +14,8 @@ static mpz_class record;
 static constexpr int est_max_c = 332579483;
 static int cnt = 0;
 
+static constexpr int max_half_width = 63;
+
 double timer()
 {
     static auto t_start = std::chrono::steady_clock::now();
@@ -96,9 +98,9 @@ int main(int argc, char **argv)
     assert(initial_primes.size() == 59);
     #pragma omp parallel for
     for (size_t i = 0; i < initial_primes.size(); i++) {
-        char s[128] = {};
-        mpz_get_str(s + (sizeof s) / 2, 10, initial_primes[i].get_mpz_t());
-        explore(s + (sizeof s) / 2 + 1, 1);
+        char s[2 * max_half_width + 2] = {};
+        mpz_get_str(s + max_half_width - 1, 10, initial_primes[i].get_mpz_t());
+        explore(s + max_half_width, 1);
     }
     // double-check with higher number of Miller-Rabin iterations
     mpz_class m = record;
