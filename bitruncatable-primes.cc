@@ -13,14 +13,14 @@ static mpz_class record;
 
 static constexpr bool allow_zero = false;
 
-static constexpr int est_max_c = 332579483;
+static constexpr intmax_t est_max_c = 332579483;
 // FIXME: est_max_c is off when zero is allowed
-static int cnt = 4;
+static intmax_t cnt = 4;
 
 static constexpr int max_half_width = 9999;
 // FIXME: way too much
 
-static int stats[max_half_width] = {4};
+static intmax_t stats[max_half_width] = {4};
 
 double timer()
 {
