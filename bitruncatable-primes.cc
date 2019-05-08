@@ -11,12 +11,12 @@
 
 static mpz_class record;
 
-static constexpr int est_max_c = 331780864;
-static int cnt = 4;
+static constexpr intmax_t est_max_c = 331780864;
+static intmax_t cnt = 4;
 
 static constexpr int max_half_width = 63;
 
-static int stats[max_half_width] = {4};
+static intmax_t stats[max_half_width] = {4};
 
 double timer()
 {
@@ -39,7 +39,7 @@ static bool operator !=(std::div_t x, std::div_t y)
 
 static void explore(char *s, int w)
 {
-    int c;
+    intmax_t c;
     #pragma omp atomic
     stats[w]++;
     #pragma omp atomic capture
