@@ -37,6 +37,23 @@ static bool operator !=(std::div_t x, std::div_t y)
     return !(x == y);
 }
 
+class ETA
+{
+private:
+    std::div_t prev;
+public:
+    void update(double time)
+    {
+        std::div_t eta = std::div(time / 60.0, 60);
+        if (eta != this->prev) {
+            std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
+            this->prev = eta;
+        }
+    }
+}
+
+static eta = ETA();
+
 static void explore(char *s, int w)
 {
     intmax_t c;
@@ -48,12 +65,8 @@ static void explore(char *s, int w)
     {
         double dt = timer();
         double eta_sec = dt * (est_max_c - c) / c;
-        auto eta = std::div(eta_sec / 60.0, 60);
         #pragma omp critical
-        if (eta != prev_eta) {
-            std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
-            prev_eta = eta;
-        }
+        eta.update(eta_sec);
     }
     bool dead_end = true;
     w += 1;
