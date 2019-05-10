@@ -93,8 +93,8 @@ static void explore(char *s, int w)
     {
         mpz_class n(s - w, 10);
         if (n > record) {
-             std::cout << n << " (" << (2 * w + 1) << " digits)" << std::endl;
-             record = n;
+            std::cout << n << " (" << (2 * w + 1) << " digits)" << std::endl;
+            record = n;
         }
     }
 }
