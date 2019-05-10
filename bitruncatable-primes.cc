@@ -41,13 +41,23 @@ class ETA
 {
 private:
     std::div_t prev;
+    bool dirty;
 public:
     void update(double time)
     {
         std::div_t eta = std::div(time / 60.0, 60);
         if (eta != this->prev) {
-            std::cerr << "ETA: " << eta.quot << "h " << eta.rem << "m" << std::endl;
+            std::cerr << "\r\033[2K" << "ETA: " << eta.quot << "h " << eta.rem << "m";
+            std::flush(std::cerr);
             this->prev = eta;
+            this->dirty = true;
+        }
+    }
+    void flush()
+    {
+        if (this->dirty) {
+            std::cerr << "\n";
+            this->dirty = false;
         }
     }
 }
@@ -93,6 +103,7 @@ static void explore(char *s, int w)
     {
         mpz_class n(s - w, 10);
         if (n > record) {
+            eta.flush();
             std::cout << n << " (" << (2 * w + 1) << " digits)" << std::endl;
             record = n;
         }
@@ -129,6 +140,7 @@ int main(int argc, char **argv)
             break;
         m = mpz_class(s.substr(1, s.length() - 2), 10);
     }
+    eta.flush();
     std::cout << "# Statistics (length, count):" << std::endl;
     for (int w = 0; stats[w]; w++)
         std::cout << "#\t" << 2 * w + 1 << "\t" << stats[w] << std::endl;
