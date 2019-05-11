@@ -1,0 +1,21 @@
+dist: trusty
+language: cpp
+compiler:
+- clang
+- gcc
+addons:
+  apt:
+    packages:
+    - cppcheck
+    - libgmp-dev
+install:
+- if [[ $CXX = clang* ]]; then make_args='OPENMP_CXXFLAGS='; fi
+- CXX+=' -std=c++11'
+- python -m pip install --user restructuredtext-lint pygments
+script:
+- restructuredtext-lint --encoding=UTF-8 README
+- cppcheck --error-exitcode=1 *.cc
+- make $make_args
+- timeout 10s ./bitruncatable-primes; [ $? -eq 124 ]
+
+# vim:ts=2 sts=2 sw=2 et
