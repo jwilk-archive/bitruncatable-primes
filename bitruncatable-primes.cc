@@ -26,8 +26,6 @@ double timer()
     return duration.count();
 }
 
-std::div_t prev_eta = {};
-
 static bool operator ==(std::div_t x, std::div_t y)
 {
     return (x.quot == y.quot) && (x.rem == y.rem);
